@@ -31,7 +31,6 @@ public class ExitControllerIT {
 	private CarSensor mockOutsideSensor;
 	private IExitUI mockExitUI;
 	
-	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		adhocTicketField = ExitController.class.getDeclaredField("adhocTicket");
