@@ -1,3 +1,4 @@
+
 package bcccp.tickets.adhoc;
 
 public interface IAdhocTicketFactory {
