@@ -95,8 +95,8 @@ public class EntryControllerTest {
 
 	@Before
 	public void setUp() throws Exception {
-		testCarparkId = "TestName1q2w3e4r5t6y7u8i9o0p";
-		testCapacity = 1936;
+		testCarparkId = "Test";
+		testCapacity = 2000;
 		mockAdhocTicketDAO = new AdhocTicketDAO(new AdhocTicketFactory());
 		mockSeasonTicketDAO = new SeasonTicketDAO(new UsageRecordFactory());
 		
