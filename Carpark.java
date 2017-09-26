@@ -1,3 +1,4 @@
+
 package bcccp.carpark;
 
 import java.util.ArrayList;
@@ -164,21 +165,5 @@ public class Carpark implements ICarpark {
 		
 		return ticket.inUse();
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

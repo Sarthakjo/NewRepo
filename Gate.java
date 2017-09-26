@@ -1,3 +1,4 @@
+
 package bcccp.carpark;
 
 import java.awt.EventQueue;
@@ -17,9 +18,7 @@ public class Gate extends JFrame implements IGate {
 	private JTextField gateStatusTextField;
 	private boolean raised;
 
-	/**
-	 * Launch the application.
-	 */
+
 	public static void main(String[] args) {
 		Gate frame = new Gate(100, 100);
 		EventQueue.invokeLater(new Runnable() {

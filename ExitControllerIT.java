@@ -53,6 +53,7 @@ public class ExitControllerIT {
 	@Before
 	public void setUp() throws Exception {
 		testCarparkId = "TestName";
+
 		testCapacity = 1936;
 		mockSeasonTicketDAO = new SeasonTicketDAO(new UsageRecordFactory());
 		
@@ -122,3 +123,4 @@ public class ExitControllerIT {
 		controller.carEventDetected(sensor.getId(), newValue);
 	}
 }
+
