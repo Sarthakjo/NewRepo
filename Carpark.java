@@ -86,7 +86,6 @@ public class Carpark implements ICarpark {
 		
 	@Override
 	public float calculateAddHocTicketCharge(long entryDateTime) {
-		//TODO Implement charge logic
 		return 3.0f;
 	}
 
@@ -95,8 +94,6 @@ public class Carpark implements ICarpark {
 	@Override
 	public boolean isSeasonTicketValid(String barcode) {		
 		ISeasonTicket ticket = seasonTicketDAO.findTicketById(barcode);
-		
-		// TODO implement full validation logic
 		return ticket != null;
 	}
 
