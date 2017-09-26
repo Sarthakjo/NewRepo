@@ -1,4 +1,3 @@
-
 package bcccp.carpark.paystation;
 
 public interface IPaystationController {
@@ -8,4 +7,3 @@ public interface IPaystationController {
 	public void ticketTaken();
 
 }
-
