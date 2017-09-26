@@ -53,7 +53,7 @@ public class ExitControllerIT {
 	@Before
 	public void setUp() throws Exception {
 		testCarparkId = "TestName";
-		testCapacity = 1936;
+		testCapacity = 2000;
 		mockSeasonTicketDAO = new SeasonTicketDAO(new UsageRecordFactory());
 		
 		mockGate = new Gate(0,0);
