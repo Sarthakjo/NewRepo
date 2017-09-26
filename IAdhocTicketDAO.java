@@ -1,3 +1,4 @@
+
 package bcccp.tickets.adhoc;
 
 import java.util.List;
@@ -10,3 +11,4 @@ public interface IAdhocTicketDAO {
 
 
 }
+
