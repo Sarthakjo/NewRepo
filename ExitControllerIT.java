@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import java.lang.reflect.Field;
 
 public class ExitControllerIT {
@@ -52,7 +53,8 @@ public class ExitControllerIT {
 	@Before
 	public void setUp() throws Exception {
 		testCarparkId = "TestName";
-		testCapacity = 2000;
+
+		testCapacity = 1936;
 		mockSeasonTicketDAO = new SeasonTicketDAO(new UsageRecordFactory());
 		
 		mockGate = new Gate(0,0);
@@ -121,3 +123,4 @@ public class ExitControllerIT {
 		controller.carEventDetected(sensor.getId(), newValue);
 	}
 }
+

@@ -1,3 +1,4 @@
+
 package bcccp.carpark.entry;
 
 public interface IEntryUI {
@@ -9,5 +10,6 @@ public interface IEntryUI {
 	public boolean ticketPrinted();
 	public void discardTicket();
 	public void beep();
+
 
 }

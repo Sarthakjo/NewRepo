@@ -1,3 +1,4 @@
+
 package bcccp.carpark;
 
 public interface IGate {
@@ -7,3 +8,4 @@ public interface IGate {
 	public boolean isRaised();
 	
 }
+
