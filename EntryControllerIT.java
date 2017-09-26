@@ -1,48 +1,54 @@
-package bcccp.carpark.exit;
 
-import bcccp.carpark.*;
-import bcccp.carpark.exit.ExitController;
-import bcccp.carpark.exit.ExitUI;
-import bcccp.carpark.exit.IExitUI;
-import bcccp.tickets.adhoc.*;
-import bcccp.tickets.season.ISeasonTicketDAO;
-import bcccp.tickets.season.SeasonTicketDAO;
-import bcccp.tickets.season.UsageRecordFactory;
+package bcccp.carpark.entry;
+
+import java.lang.reflect.Field;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
+import bcccp.carpark.CarSensor;
+import bcccp.carpark.Carpark;
+import bcccp.carpark.Gate;
+import bcccp.carpark.IGate;
+import bcccp.carpark.entry.EntryController;
+import bcccp.carpark.entry.EntryUI;
+import bcccp.carpark.entry.IEntryUI;
+import bcccp.tickets.adhoc.AdhocTicket;
+import bcccp.tickets.adhoc.AdhocTicketDAO;
+import bcccp.tickets.adhoc.AdhocTicketFactory;
+import bcccp.tickets.adhoc.IAdhocTicketDAO;
+import bcccp.tickets.season.ISeasonTicketDAO;
+import bcccp.tickets.season.SeasonTicketDAO;
+import bcccp.tickets.season.UsageRecordFactory;
 
-public class ExitControllerIT {
+public class EntryControllerIT {
 	private static Field stateField;
 	private static Field adhocTicketField;
-	private static Field adhocState;
 	private static Field carDetectedField;
 	private static Field nParkedField;
 	
 	private String testCarparkId;
 	private int testCapacity;
 	private ISeasonTicketDAO mockSeasonTicketDAO;
-	private IAdhocTicket testTicket;
+	
+	
 	private IGate mockGate;
 	private CarSensor mockInsideSensor;
 	private CarSensor mockOutsideSensor;
-	private IExitUI mockExitUI;
+	private IEntryUI mockEntryUI;
+	
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		adhocTicketField = ExitController.class.getDeclaredField("adhocTicket");
+		adhocTicketField = EntryController.class.getDeclaredField("adhocTicket");
 		adhocTicketField.setAccessible(true);
-
-		adhocState = AdhocTicket.class.getDeclaredField("state_");
-		adhocState.setAccessible(true);
 		
 		carDetectedField = CarSensor.class.getDeclaredField("carDetected");
 		carDetectedField.setAccessible(true);
 		
-		stateField = ExitController.class.getDeclaredField("state");
+		stateField = EntryController.class.getDeclaredField("state_");
 		stateField.setAccessible(true);
 		
 		nParkedField = Carpark.class.getDeclaredField("nParked");
@@ -51,48 +57,43 @@ public class ExitControllerIT {
 	
 	@Before
 	public void setUp() throws Exception {
-		testCarparkId = "TestName";
-
-		testCapacity = 1936;
+		testCarparkId = "Test";
+		testCapacity = 2000;
 		mockSeasonTicketDAO = new SeasonTicketDAO(new UsageRecordFactory());
 		
 		mockGate = new Gate(0,0);
 		mockInsideSensor = new CarSensor("detectorIn", 0, 0);
 		mockOutsideSensor = new CarSensor("detectorOut", 0, 0);
 		
-		mockExitUI = new ExitUI(0, 0);
+		mockEntryUI = new EntryUI(0, 0);
 	}
 
 	@Test
 	public void test1() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException {
 		IAdhocTicketDAO adhocTicketDAO = new AdhocTicketDAO(new AdhocTicketFactory());
 		adhocTicketDAO = new AdhocTicketDAO(new AdhocTicketFactory());
-
-		adhocTicketDAO.createTicket(testCarparkId);
-		testTicket = adhocTicketDAO.findTicketByBarcode("A1");
-
 		Carpark park = new Carpark(testCarparkId, testCapacity, adhocTicketDAO, mockSeasonTicketDAO);
-		ExitController controller = new ExitController(park, mockGate, mockInsideSensor,
-				mockOutsideSensor, mockExitUI);
-				
-		sensorToggle(mockInsideSensor, controller);
+		EntryController controller = new EntryController(park, mockGate, mockOutsideSensor,
+				mockInsideSensor, mockEntryUI);
+		park.register(controller);
+		
+		sensorToggle(mockOutsideSensor, controller);
 		Assert.assertEquals("WAITING", stateField.get(controller).toString());
-		long entertime = testTicket.getEntryDateTime();
-		testTicket.enter(entertime);
-		long paid = testTicket.getPaidDateTime();
-		float charge = testTicket.getCharge();
-		testTicket.pay(paid,charge);
-		testTicket.isPaid();
-		controller.ticketInserted("A1");
-		Assert.assertEquals("PROCESSED", stateField.get(controller).toString());
+		controller.buttonPushed();
+		AdhocTicket ticket = (AdhocTicket)adhocTicketField.get(controller);
+		Assert.assertNotNull(adhocTicketDAO.findTicketByBarcode(ticket.getBarcode()));
+		Assert.assertEquals("ISSUED", stateField.get(controller).toString());
 		controller.ticketTaken();
 		Assert.assertEquals("TAKEN", stateField.get(controller).toString());
-		sensorToggle(mockOutsideSensor, controller);
-		Assert.assertEquals("EXITING", stateField.get(controller).toString());
 		sensorToggle(mockInsideSensor, controller);
-		Assert.assertEquals("EXITED", stateField.get(controller).toString());
+		Assert.assertEquals("ENTERING", stateField.get(controller).toString());
 		sensorToggle(mockOutsideSensor, controller);
+		Assert.assertEquals("ENTERED", stateField.get(controller).toString());
+		sensorToggle(mockInsideSensor, controller);
 		Assert.assertEquals("IDLE", stateField.get(controller).toString());
+
+		Assert.assertTrue(System.currentTimeMillis() - ticket.getEntryDateTime() < 100);
+		Assert.assertEquals(1, nParkedField.get(park));
 	}
 	
 	@Test
@@ -100,26 +101,26 @@ public class ExitControllerIT {
 		IAdhocTicketDAO adhocTicketDAO = new AdhocTicketDAO(new AdhocTicketFactory());
 		adhocTicketDAO = new AdhocTicketDAO(new AdhocTicketFactory());
 		Carpark park = new Carpark(testCarparkId, 0, adhocTicketDAO, mockSeasonTicketDAO);
-		ExitController controller = new ExitController(park, mockGate, mockInsideSensor,
-				mockOutsideSensor, mockExitUI);
+		EntryController controller = new EntryController(park, mockGate, mockOutsideSensor,
+				mockInsideSensor, mockEntryUI);
+		park.register(controller);
 		
-		Assert.assertEquals("IDLE", stateField.get(controller).toString());
-		sensorToggle(mockInsideSensor, controller);
+		sensorToggle(mockOutsideSensor, controller);
 		Assert.assertEquals("WAITING", stateField.get(controller).toString());
-		controller.ticketInserted("A1");
-		Assert.assertEquals("REJECTED", stateField.get(controller).toString());
-		controller.ticketTaken();
-		sensorToggle(mockInsideSensor, controller);
+		controller.buttonPushed();
+		AdhocTicket ticket = (AdhocTicket)adhocTicketField.get(controller);
+		Assert.assertNull(ticket);
+		Assert.assertEquals("FULL", stateField.get(controller).toString());
+		sensorToggle(mockOutsideSensor, controller);
 		Assert.assertEquals("IDLE", stateField.get(controller).toString());
 
 		Assert.assertEquals(0, nParkedField.get(park));
 		
 	}
 	
-	private void sensorToggle(CarSensor sensor, ExitController controller) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+	private void sensorToggle(CarSensor sensor, EntryController controller) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
 		boolean newValue = !((boolean)carDetectedField.getBoolean(sensor));
 		carDetectedField.set(sensor, newValue);
 		controller.carEventDetected(sensor.getId(), newValue);
 	}
 }
-
